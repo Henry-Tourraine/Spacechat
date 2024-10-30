@@ -1,0 +1,39 @@
+{
+    "onMessage": 
+    [
+        {
+            "action": "play",
+            "file": "sms.mp3"
+        },
+        {
+            "names": ["bernard", "laurie"],
+            "action": "play",
+            "file": "yeah.mp3"
+        }
+    ],
+    "delay": 500,
+    "background": "fond.png",
+    "messages": [
+        {"sender": "system", "content": "Hello"},
+        {"sender": "user", "content": "Hello you"},
+        {"sender": "notification", "content": "Notification"},
+        {"sender": "system", "content": "Hello"},
+        {"sender": "user", "content": "Well and you ?"},
+        {"sender": "system", "content": "Well and you ?"},
+        {"sender": "user", "content": "Nothing too serious, \n I was just eating a swandwich", "name": "bernard"},
+        {"sender": "system", "content": "Well and you ?"},
+        {"sender": "user", "content": "Nothing too serious, I was just"},
+        {"sender": "system", "content": "Well and you ?"},
+        {"sender": "user", "content": "Well and you ?"},
+        {"sender": "system", "content": "Well and you ?", "name": "bernard"},
+        {"sender": "user", "content": "Well and you ?"},
+        {"sender": "system", "content": "Well and you ?"},
+        {"sender": "user", "content": "Well and you ?"},
+        {"sender": "system", "content": "Well and you ?"},
+        {"sender": "user", "content": "Well and you ?", "name": "laurie"},
+        {"sender": "system", "content": "Well and you ?"},
+        {"sender": "user", "content": "Well and you ?"},
+        {"sender": "system", "content": "Well and you ?"},
+        {"sender": "user", "content": "Well and you ?"}
+    ]
+}

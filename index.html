@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+
+        .root{
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+
+        .background{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            flex-flow: wrap row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .smsBasketWrapper{
+            width: 90%;
+            height: 90vh;
+            position: relative;
+            overflow: auto;
+
+        }
+
+        .smsBasketWrapper::-webkit-scrollbar {
+            width: 0px;
+        }
+
+        /* Track */
+        .smsBasketWrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        /* Handle */
+        .smsBasketWrapper::-webkit-scrollbar-thumb {
+            background: #888;
+        }
+
+        /* Handle on hover */
+        .smsBasketWrapper::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .smsBasket{
+            position: relative;
+           
+        }
+
+        .messageWrapper{
+            width: 100%;
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .user{
+            display: flex;
+            flex-flow: wrap row;
+            justify-content: end;
+            align-items: center;
+            
+        }
+
+        .user > div{
+            width: 100%;
+            background-image: url("./assets/images/sms/right2.png");
+            background-size: 100% 100%;
+            background-repeat: no-repeat; /* Prevent repetition */
+            background-position: right center;
+            color:orange;
+            text-align: right;
+        }
+
+        .notification{
+            display: flex;
+            flex-flow: wrap row;
+            justify-content: center;
+            align-items: center;
+            
+        }
+
+        .notification > div{
+            width: 100%;
+            color:green;
+            text-align: right;
+        }
+
+        .system{
+            display: flex;
+            flex-flow: wrap row;
+            justify-content: start;
+            align-items: center;
+        }
+
+        .system > div {
+            width: 100%;
+            background-image: url("./assets/images/sms/left2.png");
+            background-size: auto 100%;
+            background-repeat: no-repeat; /* Prevent repetition */
+            background-position: left center;
+            color:cyan;
+            text-align: left;
+        }
+
+        
+        .sms{
+            padding: 10px 3px;
+            font-weight: bold;
+        }
+
+        .system .sms{
+            color: violet;
+            margin-left: 1em;
+        }
+
+        .notification .sms{
+            color: green;
+            text-align: center;
+        }
+
+        .user .sms{
+            color: cyan;
+            margin-right: 1em;
+        }
+
+
+        .record{
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            border-radius: 2vh 2vh;
+            outline: none;
+            border: none;
+            z-index: 99999;
+        }
+
+        .play{
+            position: absolute;
+            top: 70px;
+            left: 30px;
+            border-radius: 2vh 2vh;
+            outline: none;
+            border: none;
+            z-index: 99999;
+        }
+        
+    </style>
+    <button class="record">enregistrer</button>
+    <button class="play">Lancer la conversation</button>
+    <div class="root">
+        <div class="background">
+            <div class="smsBasketWrapper">
+                <div class="smsBasket"></div>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        // load config
+        let config = await fetch("./assets/config.json")
+        .then(e=>e.json())
+        .then(e=>e);
+
+        // prepare audios for every onMessage listener
+        config.onMessage.filter(e => e.action == "play").map(e => { e.audio = new Audio("assets/audio/" + e.file); return e});
+        let allSoundListeners = config.onMessage.filter(e => e.names == undefined);
+        let soundListeners = config.onMessage.filter(e => e.names != undefined);
+
+        // set background
+        let i = document.createElement("img");
+        i.src = "./assets/images/" + config.background;
+        
+        let background = document.querySelector(".background");
+        background.style.backgroundImage = `url(${i.src})`;
+
+        // rescale background image to fit browser height
+        let originalDims = {width: i.naturalWidth, height: i.naturalHeight};
+        let screenDims = {width: window.innerWidth, height: window.innerHeight};
+        let screenRatio = originalDims.height / screenDims.height;
+        
+        let newDims = {width: originalDims.width / screenRatio, height: screenDims.height }
+        background.style.width = newDims.width + "px";
+        background.style.height = newDims.height + "px";
+
+      
+        let smsBasket = document.querySelector(".smsBasket");
+        let smsBasketWrapper = document.querySelector(".smsBasketWrapper");
+
+        let playSound = (src)=>{
+            let temp = new Audio(src);
+                temp.oncanplaythrough = () => {
+                    temp.play();
+                };
+                temp.onended = () => {
+                    temp.src = "";
+                };
+        }
+
+        // inserts message in message basket, then plays all sounds required
+        function addMessage(message){
+            let wrapper = document.createElement("div");
+            wrapper.classList.add("messageWrapper");
+            wrapper.classList.add(message.sender);
+            
+            let text = message.content.replace(/\n/g, '<br/>');
+            console.log(text);
+            wrapper.innerHTML = `<div class="smsBackground"><div class="sms"></div></div>`;
+            wrapper.querySelector(".sms").innerHTML = text;
+            smsBasket.appendChild(wrapper);
+            smsBasketWrapper.scrollTop = smsBasketWrapper.scrollHeight;
+            for(let listener of allSoundListeners){
+                playSound(listener.audio.src); 
+            }
+            for(let listener of soundListeners){
+                if(listener.names.includes(message.name)) playSound(listener.audio.src); 
+            }
+        }
+
+        let delay = config.delay;
+        let messages = config.messages;
+
+        function play(index=0){
+            setTimeout(()=>{
+                addMessage(messages[index]);
+                if(index+1 >= messages.length) return;
+                play(index+1);
+            }, delay);
+        }
+
+        // Recording part
+        let recordButton = document.querySelector(".record");
+        let mediaRecorder = null;
+        let recordedChunks = [];
+
+        async function startRecording() {
+            console.log("record");
+            // Ask the user for permission to capture the screen
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: true,
+                audio: true // Set to true if you want to capture audio
+            });
+
+            // Create a MediaRecorder instance
+            mediaRecorder = new MediaRecorder(stream);
+
+            // Event listener for when data is available
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            // When recording stops, create a blob from the recorded chunks
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                let a = document.createElement("a");
+                a.href = url;
+                a.download = "myNotebook.webm";
+
+                document.body.appendChild(a);
+                a.click();
+                a.remove()
+                recordedChunks = []; // Clear the chunks for next recording
+            };
+
+            // Start recording
+            mediaRecorder.start();
+            recordButton.textContent = 'Stop Recording'; // Change button text
+        }
+
+        // Function to stop recording
+        function stopRecording() {
+            mediaRecorder.stop();
+            recordButton.textContent = 'Start Recording'; // Reset button text
+        }
+
+            recordButton.addEventListener('click', () => {
+                alert()
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                    stopRecording();
+                } else {
+                    startRecording();
+                }
+            });
+            
+      
+        let isPlaying = false;
+        document.querySelector(".play").addEventListener("click", e=>{
+            if(!isPlaying) {
+                play();
+                isPlaying = true;
+            }
+        })
+        // End Recording part
+    </script>
+    
+</body>
+</html>
