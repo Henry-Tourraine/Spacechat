@@ -55,8 +55,7 @@ S'il y a besoin de retours à la ligne, utiliser le caractère "\n".
 
 ***Style***
 
-Pour changer le padding ou les margin des messages, utiliser la classe css ".sms".
-Pour être spécifique à un utilisateur, ".system .sms" ou ".user .sms".
-Pour les espaces entre messages, utiliser margin dans ".messageWrapper".
+Pour changer la taille du cadre des messages, changer les width et height de ".smsBasketWrapper".
+Pour changer le décalage du texte des messages, changer les margins de ".system .sms", ".user .sms" ou ".notification .sms".
 
 Le fond des messages peut être changé dans les classes : ".system > div" et ".user > div".
